@@ -197,6 +197,14 @@ cd pipeline/prod
 oc create -f task-deploy.yaml        -n prod-env
 oc create -f pipeline.yaml           -n prod-env
 ```
+
+3. Update promote task with your OpenShift routes `pipelines/stage/task-promote-prod.yaml`: 
+
+```
+           testRoute=<route to your OpenShift TEST cluster>
+           prodRoute=<route to your OpenShift PRODUCTION cluster>
+```
+
 ---
 
 ## Build and promote the image on TEST cluster

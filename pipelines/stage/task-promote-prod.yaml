@@ -38,8 +38,8 @@ spec:
         command: ["/bin/bash", "-c"]
         args:
           - |-
-           testRoute=default-route-openshift-image-registry.ual-lon05-b3c-4x16-f3ad35798d8ef5ab84d2e8b3eb8ae1fe-0000.eu-gb.containers.appdomain.cloud
-           prodRoute=default-route-openshift-image-registry.ual-lon02-b3c4x16-f3ad35798d8ef5ab84d2e8b3eb8ae1fe-0000.eu-gb.containers.appdomain.cloud
+           testRoute=<route to your OpenShift TEST cluster>
+           prodRoute=<route to your OpenShift PRODUCTION cluster>
 
            testImage=${testRoute}/$(inputs.params.STAGE_PROJECT)/$(inputs.params.APP_NAME):$(inputs.params.APP_VERSION)
            prodImage=${prodRoute}/$(inputs.params.PROD_PROJECT)/$(inputs.params.APP_NAME):$(inputs.params.APP_VERSION)
