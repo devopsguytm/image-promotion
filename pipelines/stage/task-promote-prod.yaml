@@ -1,0 +1,50 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: promote-strapi-to-prod-cluster
+spec: 
+  params:
+    - name: APP_NAME
+      description: The name of the application
+      default: 'strapi'
+      type: string
+    - name: APP_VERSION
+      description: The version of the application
+      default: '1.0.0'
+      type: string
+    - name: STAGE_PROJECT
+      description: The project where you deploy the app
+      default: 'stage-env'
+      type: string
+    - name: PROD_PROJECT
+      description: The project where you promote the app
+      default: 'prod-env'
+      type: string
+  volumes:
+    - name: os-token-prod
+      secret:
+        secretName: os-prod-cluster   
+    - name: os-token-test
+      secret:
+        secretName: os-test-cluster     
+  steps:
+      - name: promote-image-using-skopeo
+        image: quay.io/containers/skopeo:v1.0.0
+        volumeMounts:
+        - name: os-token-prod
+          mountPath: /os-token-prod
+        - name: os-token-test
+          mountPath: /os-token-test  
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+           testRoute=default-route-openshift-image-registry.ual-lon05-b3c-4x16-f3ad35798d8ef5ab84d2e8b3eb8ae1fe-0000.eu-gb.containers.appdomain.cloud
+           prodRoute=default-route-openshift-image-registry.ual-lon02-b3c4x16-f3ad35798d8ef5ab84d2e8b3eb8ae1fe-0000.eu-gb.containers.appdomain.cloud
+
+           testImage=${testRoute}/$(inputs.params.STAGE_PROJECT)/$(inputs.params.APP_NAME):$(inputs.params.APP_VERSION)
+           prodImage=${prodRoute}/$(inputs.params.PROD_PROJECT)/$(inputs.params.APP_NAME):$(inputs.params.APP_VERSION)
+
+           testToken=$(cat /os-token-test/token)
+           prodToken=$(cat /os-token-prod/token)
+
+           skopeo copy docker://${testImage} docker://${prodImage} --src-creds openshift:${testToken} --dest-creds openshift:${prodToken}           

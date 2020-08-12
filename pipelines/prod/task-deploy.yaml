@@ -1,0 +1,96 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: deploy-strapi-app-from-image
+spec:
+  inputs:
+    params:
+      - name: APP_NAME
+        description: The name of the application
+        default: 'strapi'
+        type: string
+      - name: APP_VERSION
+        description: The version of the application
+        default: '1.0.0'
+        type: string
+      - name: PROD_PROJECT
+        description: The project where you deploy the app
+        default: 'prod-env'
+        type: string
+
+  steps:
+
+      - name: create-app
+        image: quay.io/openshift/origin-cli:4.3.0
+        workingDir: /workspace/source
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+            oc version
+            oc get dc  -n $(inputs.params.PROD_PROJECT) | grep $(inputs.params.APP_NAME)
+            if [[ $? -ne 0 ]]
+            then
+                oc new-app -i $(inputs.params.APP_NAME):$(inputs.params.APP_VERSION) -n $(inputs.params.PROD_PROJECT)
+                oc patch dc $(inputs.params.APP_NAME) -p '{"spec":{"strategy":{"type":"Recreate"}}}' -n $(inputs.params.PROD_PROJECT)
+                oc expose dc/$(inputs.params.APP_NAME) --port=1337 -n $(inputs.params.PROD_PROJECT)
+                oc expose svc/$(inputs.params.APP_NAME) -n $(inputs.params.PROD_PROJECT)
+                oc set triggers dc/$(inputs.params.APP_NAME) --remove-all -n $(inputs.params.PROD_PROJECT)
+            else
+                echo "Application already exists. New version = $(inputs.params.APP_VERSION)"
+                oc set triggers dc/$(inputs.params.APP_NAME) --remove-all -n $(inputs.params.PROD_PROJECT)               
+            fi      
+      - name: set-app-labels
+        image: quay.io/openshift/origin-cli:4.3.0
+        workingDir: /workspace/source
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+            oc label dc/$(inputs.params.APP_NAME) app.kubernetes.io/name=nodejs --overwrite -n $(inputs.params.PROD_PROJECT)
+            oc label dc/$(inputs.params.APP_NAME) app.version=$(inputs.params.APP_VERSION) --overwrite -n $(inputs.params.PROD_PROJECT)
+            oc set env dc/$(inputs.params.APP_NAME) app.version=$(inputs.params.APP_VERSION) -n $(inputs.params.PROD_PROJECT)   
+            oc set env dc/$(inputs.params.APP_NAME) NODE_ENV=production -n $(inputs.params.PROD_PROJECT)  
+      - name: set-app-probes
+        image: quay.io/openshift/origin-cli:4.3.0
+        workingDir: /workspace/source
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+            oc get dc  -n $(inputs.params.PROD_PROJECT) | grep $(inputs.params.APP_NAME)
+            if [[ $? -ne 0 ]]
+            then
+                oc set probe dc/$(inputs.params.APP_NAME) --remove --readiness --liveness -n $(inputs.params.PROD_PROJECT)
+                oc set probe dc/$(inputs.params.APP_NAME) --readiness --get-url=http://:1337/ --initial-delay-seconds=60 -n $(inputs.params.PROD_PROJECT)
+            else
+                echo "Application already exists. Probes will NOT be updated."
+            fi    
+      - name: set-app-autoscale
+        image: quay.io/openshift/origin-cli:4.3.0
+        workingDir: /workspace/source
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+            oc get hpa -n $(inputs.params.PROD_PROJECT) | grep $(inputs.params.APP_NAME) 
+            if [[ $? -ne 0 ]]
+            then
+                oc autoscale dc $(inputs.params.APP_NAME) --min 2 --max 6 --cpu-percent=75 -n $(inputs.params.PROD_PROJECT)  
+                oc set resources dc $(inputs.params.APP_NAME) --requests=cpu=200m -n $(inputs.params.PROD_PROJECT)         
+            else
+                echo "Application autoscale is already configured."
+            fi
+      - name: set-app-image
+        image: quay.io/openshift/origin-cli:4.3.0
+        workingDir: /workspace/source
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+            echo "Changing Deployment ImageStream to version $(inputs.params.APP_VERSION)"
+            oc set image dc/$(inputs.params.APP_NAME) $(inputs.params.APP_NAME)=$(inputs.params.PROD_PROJECT)/$(inputs.params.APP_NAME):$(inputs.params.APP_VERSION) --source=imagestreamtag -n $(inputs.params.PROD_PROJECT)    
+      - name: describe-app-triggers
+        image: quay.io/openshift/origin-cli:4.3.0
+        workingDir: /workspace/source
+        command: ["/bin/bash", "-c"]
+        args:
+          - |-
+            oc set triggers dc/$(inputs.params.APP_NAME) --remove-all -n $(inputs.params.PROD_PROJECT)
+            oc set triggers dc/$(inputs.params.APP_NAME) --from-config=true -n $(inputs.params.PROD_PROJECT)
+            oc set triggers dc/$(inputs.params.APP_NAME) -n $(inputs.params.PROD_PROJECT)

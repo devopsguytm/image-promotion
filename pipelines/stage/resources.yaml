@@ -1,0 +1,25 @@
+
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: strapi-repo-stage
+spec:
+  type: git
+  params:
+    - name: url
+      value: https://github.com/vladsancira/image-promotion.git
+    - name: revision
+      value: master
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: strapi-image-stage
+spec:
+  type: image
+  params:
+    - name: url
+      value: image-registry.openshift-image-registry.svc:5000/stage-env/strapi
+

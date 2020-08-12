@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: strapi-deploy-pipeline
+spec:
+  params:
+    - name: APP_NAME
+      description: The name of the application
+      default: 'strapi'      
+    - name: APP_VERSION
+      description: The version of the application
+      default: '1.0.0'    
+    - name: PROD_PROJECT
+      description: The project where you deploy the app
+      default: 'prod-env'  
+  tasks:
+  - name: deploy
+    taskRef:
+      name: deploy-strapi-app-from-image
+    params:
+        - name: APP_NAME
+          value: "$(params.APP_NAME)"
+        - name: APP_VERSION
+          value: "$(params.APP_VERSION)"  
+        - name: PROD_PROJECT
+          value: "$(params.PROD_PROJECT)"    
