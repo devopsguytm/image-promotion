@@ -8,10 +8,9 @@ Usually, projects are using separate OpenShift 4 clusters for TEST and PRODUCTIO
 
 [Skopeo](https://www.redhat.com/en/blog/skopeo-10-released) is a tool for moving container images between different types of container storages.  It allows you to copy container images between container registries like docker.io, quay.io, and your internal container registry or different types of storage on your local system.
 
-
-
 [Tekton Pipelines]( https://developer.ibm.com/videos/what-is-tekton/) is an open source framework used for creating cloud-native continuous integration and continuous delivery (CI/CD) pipelines that run on Kubernetes. Tekton Pipelines was built specifically for container environments, supports the software lifecycle, and uses a serverless approach.
 
+For this tutorial we will use [Strapi](https://strapi.io/) (Open source Node.js Headless CMS), which we will build, deploy and promote in `staging` and `production` environments. Strapi will be connected to an PostgreSQL database, which we will provision in OpenShift. 
 
 In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4.3 using Tekton Pipelines.
 
@@ -36,9 +35,10 @@ It should take you approximately 1-2 hour to provision the OpenShift clusters an
 ## Steps
 
 1. [Configure OpenShift clusters](#configure-openshift-clusters)
-2. [Create a cloud-native CI/CD pipeline on OpenShift](#create-a-cloud-native-cicd-pipeline-on-openshift)
-3. [Build and promote the image on TEST cluster](#build-and-promote-the-image-on-test-cluster)
-4. [Deploy newly created image on PROD cluster](#deploy-newly-created-image-on-prod-cluster)
+2. [Provision PostgreSQL databases](#provision-postgresql-databases)
+3. [Create a cloud-native CI/CD pipeline on OpenShift](#create-a-cloud-native-cicd-pipeline-on-openshift)
+4. [Build and promote the image on TEST cluster](#build-and-promote-the-image-on-test-cluster)
+5. [Deploy newly created image on PROD cluster](#deploy-newly-created-image-on-prod-cluster)
 
 
 It’s also important to know what each Git folder contains: 
@@ -78,7 +78,7 @@ On `PRODUCTION` cluster :
 oc new-project prod-env
 ```
 
-3.  We will create the strapi image in OCP TEST cluster and  promote the image in OCP PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on TEST cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
+3.  We will create the Strapi image in OCP TEST cluster and  promote the image in OCP PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on TEST cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
 
 
 On `PRODUCTION` cluster :
@@ -140,6 +140,26 @@ oc adm policy add-scc-to-user privileged -z default -n prod-env
 ### The image below illustrates what the OpenShift CI/CD Pipeline design looks like.
 
 ![Pipeline Design](images/pipeline-design.png?raw=true "Pipeline Design")
+
+---
+## Provision PostgreSQL databases
+
+Follow these instructions in order to quickly provision a new PostgreSQL instance in `stage-env` and `prod-env` projects. 
+
+![Pipeline Design](images/postgres.png?raw=true "Pipeline Design")
+
+As credentials use :
+
+```
+DATABASE_NAME=strapidb
+DATABASE_HOST=postgresql
+DATABASE_USERNAME=strapi
+DATABASE_PASSWORD=password
+```
+
+https://docs.openshift.com/container-platform/4.3/applications/service_brokers/provisioning-template-application.html
+
+Note the database credentials for both projects and update the 
 
 ---
 ## Create a cloud-native CI/CD pipeline on OpenShift
