@@ -271,6 +271,7 @@ strapi   image-registry.openshift-image-registry.svc:5000/prod-env/strapi   late
 
 3. Application is now deployed in `prod-env`.
 
+![IBM](images/strapi.png?raw=true "IBM") 
 ---
 
 # Summary 
