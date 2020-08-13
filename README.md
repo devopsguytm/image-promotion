@@ -1,4 +1,4 @@
-# Create a CI/CD Tekton Pipeline for building, promoting & deploying Strapi (Open source Node.js Headless CMS) in OpenShift 4.3 
+# Promoting Docker Images from different OpenShift 4 clusters using Tekton CI/CD Pipeline
 
 ![IBM](./images/os-logo.jpg?raw=true "IBM")
 
@@ -39,7 +39,7 @@ It should take you approximately 1-2 hour to provision the OpenShift clusters an
 
 It’s also important to know what each Git folder contains: 
 
-* `strapi-app` is the context root of the Strapi application.
+* `strapi-app` is the context root of the [Strapi](https://strapi.io/) (Open source Node.js Headless CMS) application.
 
 * `pipelines/stage` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for TEST cluster.
 
