@@ -77,7 +77,18 @@ echo $token
 oc create secret generic os-test-cluster --from-literal=token=$token
 ```
 
-Now you can use this secrets mounted inside a task pipeline as volume (see file `pipelines/prod/task-promote-prod.yaml`)
+Now you can use this secrets mounted inside a task pipeline as volume (see file [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml))
+```
+...
+  volumes:
+    - name: os-token-prod
+      secret:
+        secretName: os-prod-cluster   
+    - name: os-token-test
+      secret:
+        secretName: os-test-cluster 
+...        
+```
 
 
 2. Install the OpenShift Pipelines Operator on both clusters.
