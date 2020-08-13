@@ -4,11 +4,12 @@
 
 [Red Hat OpenShift on IBM Cloud]( https://www.ibm.com/cloud/openshift) is an extension of the IBM Cloud Kubernetes Service, where IBM manages an OpenShift Container Platform for you. 
 
-[Tekton Pipelines]( https://developer.ibm.com/videos/what-is-tekton/) is an open source framework used for creating cloud-native continuous integration and continuous delivery (CI/CD) pipelines that run on Kubernetes. Tekton Pipelines was built specifically for container environments, supports the software lifecycle, and uses a serverless approach.
-
 Usually, projects are using separate OpenShift 4 clusters for TEST and PRODUCTION. In order to reduce the resource consumption on the PRODUCTION cluster, Docker images are built on the TEST cluster using `buildah` and promoted to PRODUCTION cluster using `skopeo` through a Tekton pipeline.
 
-In this tutorial, you will become familiar with CI/CD pipelines and Image promotion on Red Hat OpenShift 4.3 using Tekton Pipelines.
+[Tekton Pipelines]( https://developer.ibm.com/videos/what-is-tekton/) is an open source framework used for creating cloud-native continuous integration and continuous delivery (CI/CD) pipelines that run on Kubernetes. Tekton Pipelines was built specifically for container environments, supports the software lifecycle, and uses a serverless approach.
+
+
+In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4.3 using Tekton Pipelines.
 
 
 ## Prerequisites
@@ -20,7 +21,6 @@ Before you begin this tutorial, please complete the following steps:
 
 
 *Optional: Download [Visual Studio Code IDE](https://code.visualstudio.com) for editing the Node.js project.*
-
 
 
 ## Estimated time 
@@ -53,7 +53,28 @@ It’s also important to know what each Git folder contains:
 
 ## Configure OpenShift clusters
 
-1.  We will create the strapi image in OCP TEST cluster and  promote the image in OCP PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on TEST cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
+1. Install the OpenShift Pipelines Operator on both clusters.
+
+Follow the OpenShift documentation on how to install the OpenShift Pipelines Operator from either WebConsole or CLI:
+
+https://docs.openshift.com/container-platform/4.4/pipelines/installing-pipelines.html#op-installing-pipelines-operator-in-web-console_installing-pipelines 
+
+After successful installation, you will have all related Tekton building blocks created in `pipeline` project.
+
+2. Create `ci-env`, `stage-env` and `prod-env` projects. In `ci-env`, you will store the CI/CD pipeline and all pipeline resources. In `stage-env` and `prod-env`, you will deploy the application through image promotion.
+
+On `TEST` cluster :
+```
+oc new-project ci-env
+oc new-project stage-env
+```
+
+On `PRODUCTION` cluster :
+```
+oc new-project prod-env
+```
+
+3.  We will create the strapi image in OCP TEST cluster and  promote the image in OCP PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on TEST cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
 
 Skopeo is a tool for moving container images between different types of container storages.  It allows you to copy container images between container registries like docker.io, quay.io, and your internal container registry or different types of storage on your local system.
 
@@ -88,28 +109,6 @@ Now you can use this secrets mounted inside a task pipeline as volume (see file 
       secret:
         secretName: os-test-cluster 
 ...        
-```
-
-
-2. Install the OpenShift Pipelines Operator on both clusters.
-
-Follow the OpenShift documentation on how to install the OpenShift Pipelines Operator from either WebConsole or CLI:
-
-https://docs.openshift.com/container-platform/4.4/pipelines/installing-pipelines.html#op-installing-pipelines-operator-in-web-console_installing-pipelines 
-
-After successful installation, you will have all related Tekton building blocks created in `pipeline` project.
-
-3. Create `ci-env`, `stage-env` and `prod-env` projects. In `ci-env`, you will store the CI/CD pipeline and all pipeline resources. In `stage-env` and `prod-env`, you will deploy the application through image promotion.
-
-On `TEST` cluster :
-```
-oc new-project ci-env
-oc new-project stage-env
-```
-
-On `PRODUCTION` cluster :
-```
-oc new-project prod-env
 ```
 
 4. Allow the `pipeline` ServiceAccount to create resources and make deploys on `stage-env` project:
@@ -153,7 +152,7 @@ https://docs.openshift.com/container-platform/4.4/pipelines/understanding-opensh
 
 ## Create the Tekton CI/CD pipeline
 
-1. Clone the Git project:
+1. Clone or Fork this GitHub project:
 
 ```
 git clone https://github.com/vladsancira/image-promotion.git
@@ -182,7 +181,7 @@ oc secrets link pipeline github-access-token -n ci-env
 
 On `TEST` cluster :
 ```
-cd pipeline/stage
+cd pipelines/stage
 oc create -f resources.yaml          -n ci-env
 oc create -f task-build.yaml         -n ci-env
 oc create -f task-deploy.yaml        -n ci-env
@@ -192,7 +191,7 @@ oc create -f pipeline.yaml           -n ci-env
 ```
 On `PRODUCTION` cluster :
 ```
-cd pipeline/prod
+cd pipelines/prod
 oc create -f task-deploy.yaml        -n prod-env
 oc create -f pipeline.yaml           -n prod-env
 ```
@@ -216,7 +215,7 @@ oc create -f pipeline.yaml           -n prod-env
 ![IBM](images/start-stage-pipeline.png?raw=true "IBM") 
 
 
-2. Check the PipelineRun that the image was promoted :
+2. Check the PipelineRun that the Strapi image was promoted (pushed) to `PRODUCTION` cluster:
 
 ![IBM](images/step-promote.png?raw=true "IBM") 
 
