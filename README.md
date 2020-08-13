@@ -137,7 +137,7 @@ oc adm policy add-scc-to-user anyuid -z default -n prod-env
 oc adm policy add-scc-to-user privileged -z default -n prod-env
 ```
 ---
-### The image below illustrates what the OpenShift Pipeline design looks like.
+### The image below illustrates what the OpenShift CI/CD Pipeline design looks like.
 
 ![Pipeline Design](images/pipeline-design.png?raw=true "Pipeline Design")
 
@@ -197,7 +197,7 @@ oc create -f task-deploy.yaml        -n prod-env
 oc create -f pipeline.yaml           -n prod-env
 ```
 
-3. Update promote task with your OpenShift routes `pipelines/stage/task-promote-prod.yaml`: 
+3. Update promote task with your OpenShift routes [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml): 
 
 ```
            testRoute=<route to your OpenShift TEST cluster>
