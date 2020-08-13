@@ -10,7 +10,7 @@ RUN echo "unsafe-perm = true" >> ~/.npmrc
 RUN npm install -g strapi@3.0.0-beta.18
 
 # Moving the start-up script to the appropriate location
-COPY strapi.sh /root
+COPY ./strapi-app/strapi.sh /root
 
 # Giving read and execution permissions
 RUN chmod +x /root/strapi.sh

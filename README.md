@@ -144,7 +144,7 @@ oc adm policy add-scc-to-user privileged -z default -n prod-env
 ---
 ## Provision PostgreSQL databases
 
-Follow these instructions in order to quickly provision a new PostgreSQL instance in `stage-env` and `prod-env` projects. 
+Follow these [instructions](https://docs.openshift.com/container-platform/4.3/applications/service_brokers/provisioning-template-application.html) in order to quickly provision a new PostgreSQL instance in `stage-env` and `prod-env` projects. 
 
 ![Pipeline Design](images/postgres.png?raw=true "Pipeline Design")
 
@@ -157,9 +157,6 @@ DATABASE_USERNAME=strapi
 DATABASE_PASSWORD=password
 ```
 
-https://docs.openshift.com/container-platform/4.3/applications/service_brokers/provisioning-template-application.html
-
-Note the database credentials for both projects and update the 
 
 ---
 ## Create a cloud-native CI/CD pipeline on OpenShift
@@ -178,24 +175,6 @@ https://docs.openshift.com/container-platform/4.4/pipelines/understanding-opensh
 ```
 git clone https://github.com/vladsancira/image-promotion.git
 cd image-promotion
-```
-
-If you use IBM GitHub Private Repo then you need to perform these steps :
-
-* create the GitHub Access token for your GitHub account from https://github.ibm.com/settings/tokens
-* add read rights to GIT repo for this token
-* create an OpenShift secret to store the credentials (username & token)
-```
-oc create secret generic github-access-token --from-literal username=<github_user> --from-literal password=<github_token> -n ci-env 
-```
-
-* addnotate this secret to be used on https://github.ibm.com
-```
-oc patch secret github-access-token --patch '{"metadata":{"annotations":{"tekton.dev/git-0":"https://github.ibm.com"}}}' -n ci-env
-```
-* link the secret to pipeline ServiceAccount from ci-env project
-```
-oc secrets link pipeline github-access-token -n ci-env
 ```
 
 2. Create Tekton resources, tasks, and a pipeline:

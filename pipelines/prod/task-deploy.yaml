@@ -59,7 +59,7 @@ spec:
             if [[ $? -ne 0 ]]
             then
                 oc set probe dc/$(inputs.params.APP_NAME) --remove --readiness --liveness -n $(inputs.params.PROD_PROJECT)
-                oc set probe dc/$(inputs.params.APP_NAME) --readiness --get-url=http://:1337/ --initial-delay-seconds=60 -n $(inputs.params.PROD_PROJECT)
+                oc set probe dc/$(inputs.params.APP_NAME) --readiness --get-url=http://:1337/ --initial-delay-seconds=300 -n $(inputs.params.PROD_PROJECT)
             else
                 echo "Application already exists. Probes will NOT be updated."
             fi    
