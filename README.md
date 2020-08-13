@@ -255,4 +255,4 @@ strapi   image-registry.openshift-image-registry.svc:5000/prod-env/strapi   late
 
 # Summary 
 
-Congratulations! You have successfully created a cloud-native CI/CD Tekton Pipeline for building, promoting abd deploying the Strapi application in OpenShift clusters. 
+Congratulations! You have successfully created a cloud-native CI/CD Tekton Pipeline for building, promoting and deploying the Strapi CMS application in OpenShift clusters. 
