@@ -10,11 +10,11 @@ do
     APP_NAME=strapi-example
 
     DATABASE_CLIENT=postgres
-    DATABASE_NAME=strapidb
+    DATABASE_NAME=${DATABASE_NAME}
     DATABASE_HOST=${POSTGRESQL_SERVICE_HOST}
     DATABASE_PORT=${POSTGRESQL_SERVICE_PORT}
-    DATABASE_USERNAME=strapi
-    DATABASE_PASSWORD=password
+    DATABASE_USERNAME=${DATABASE_USER}
+    DATABASE_PASSWORD=${DATABASE_PASSWORD}
 
     if [ ! -f "/persistent/${APP_NAME}/package.json" ] && [ ${strapiCount} == 1 ]
     then

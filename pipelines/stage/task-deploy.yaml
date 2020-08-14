@@ -51,7 +51,8 @@ spec:
           - |-
             oc label dc/$(inputs.params.APP_NAME) app.kubernetes.io/name=nodejs --overwrite -n $(inputs.params.DEPLOY_PROJECT)
             oc label dc/$(inputs.params.APP_NAME) app.version=$(inputs.params.APP_VERSION) --overwrite -n $(inputs.params.DEPLOY_PROJECT)
-            oc set env dc/$(inputs.params.APP_NAME) app.version=$(inputs.params.APP_VERSION) -n $(inputs.params.DEPLOY_PROJECT)              
+            oc set env dc/$(inputs.params.APP_NAME) app.version=$(inputs.params.APP_VERSION) -n $(inputs.params.DEPLOY_PROJECT)    
+            oc set env dc/$(inputs.params.APP_NAME) --from secret/postgresql --overwrite -n $(inputs.params.DEPLOY_PROJECT)          
       - name: set-app-probes
         image: quay.io/openshift/origin-cli:4.3.0
         workingDir: /workspace/source
