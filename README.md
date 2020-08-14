@@ -161,6 +161,10 @@ database-name:       8 bytes
 database-password:  16 bytes
 database-user:       7 bytes
 ```
+Check [task-deploy.yaml](pipelines/stage/task-deploy.yaml) :
+```
+oc set env dc/$(inputs.params.APP_NAME) --from secret/postgresql --overwrite -n $(inputs.params.DEPLOY_PROJ)
+```
 
 ---
 ## Create a cloud-native CI/CD pipeline on OpenShift
