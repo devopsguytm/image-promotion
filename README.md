@@ -144,19 +144,23 @@ oc adm policy add-scc-to-user privileged -z default -n prod-env
 ---
 ## Provision PostgreSQL databases
 
-Follow these [instructions](https://docs.openshift.com/container-platform/4.3/applications/service_brokers/provisioning-template-application.html) in order to quickly provision a new PostgreSQL instance in `stage-env` and `prod-env` projects. 
+Follow these [instructions](https://docs.openshift.com/container-platform/4.3/applications/service_brokers/provisioning-template-application.html) in order to quickly provision a new PostgreSQL instance in `stage-env` and `prod-env` projects. Use as `Database Service Name` = `postgresql`
 
 ![Pipeline Design](images/postgres.png?raw=true "Pipeline Design")
 
-As credentials use :
-
+The template will create a new secret called `postgresql` which we will add as environment variable for `Strapi` (from CI/CD pipeline):
 ```
-DATABASE_NAME=strapidb
-DATABASE_HOST=postgresql
-DATABASE_USERNAME=strapi
-DATABASE_PASSWORD=password
-```
+oc describe secret postgresql
+Name:         postgresql
+...
+Type:  Opaque
 
+Data
+====
+database-name:       8 bytes
+database-password:  16 bytes
+database-user:       7 bytes
+```
 
 ---
 ## Create a cloud-native CI/CD pipeline on OpenShift
