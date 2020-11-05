@@ -4,7 +4,7 @@
 
 [Red Hat OpenShift on IBM Cloud]( https://www.ibm.com/cloud/openshift) is an extension of the IBM Cloud Kubernetes Service, where IBM manages an OpenShift Container Platform for you. 
 
-In this tutorial we will use two separate OpenShift v4.x clusters, that represent the test and production environments. In order to increase security and resilience  as well as to reduce the resource consumption on the OpenShift PRODUCTION cluster, Docker images are built and tested on the OpenShift TEST cluster using `buildah` and promoted to OpenShift PRODUCTION cluster using `skopeo` through a Tekton pipeline.
+In this tutorial we will use two separate OpenShift v4.x clusters, that represent the test and production environments. In order to increase security and resilience  as well as to reduce the resource consumption on the OpenShift PRODUCTION cluster, Docker images are built and tested on the OpenShift TEST cluster using buildah and promoted to OpenShift PRODUCTION cluster using skopeo through a Tekton pipeline.
 
 [Skopeo](https://www.redhat.com/en/blog/skopeo-10-released) is a tool for moving container images between different types of container storages.  It allows you to copy container images between container registries like docker.io, quay.io, and your internal container registry or different types of storage on your local system.
 
@@ -78,8 +78,8 @@ On OpenShift `PRODUCTION` cluster :
 oc new-project prod-env
 ```
 
-3.  We will create the Strapi image in OpenShift TEST cluster and  promote the image in OpenShift PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on OpenShift 
-cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for OpenShift TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
+3.  We will create the Strapi image in OpenShift TEST cluster and  promote the image in OpenShift PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the OpenShift PROD cluster. This token must be saved on OpenShift 
+cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for OpenShift TEST cluster, which will be used for promoting the image using skopeo copy tool.
 
 
 On OpenShift `PRODUCTION` cluster :
@@ -89,9 +89,9 @@ token-prod=`oc sa get-token pipeline`
 echo $token-prod
 oc whoami --show-server=true
 ```
-*Note the pipeline service account token and OpenShift PROD cluster login URL. For example the OpenShift PROD cluster login URL would be something like this : https://<host>.cloud.ibm.com:<port>
+*Note the pipeline service account token and OpenShift PROD cluster login URL
 
-*You will need to edit [task-promote-prod.yaml] and update the prodRoute=<route to your OpenShift PRODUCTION cluster> placeholder.
+*You will need to edit [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml) and update the prodRoute=<route to your OpenShift PRODUCTION cluster> placeholder.
 
 
 On OpenShift `TEST` cluster :
@@ -154,7 +154,7 @@ Follow these [instructions](https://docs.openshift.com/container-platform/4.3/ap
 
 ![Pipeline Design](images/postgres.png?raw=true "Pipeline Design")
 
-The template will create a new secret called `postgresql` which we will add as environment variable for `Strapi` (from CI/CD pipeline):
+The template will create a new secret called `postgresql` which we will add as environment variable for Strapi (from CI/CD pipeline):
 ```
 oc describe secret postgresql
 Name:         postgresql
@@ -175,7 +175,7 @@ oc set env dc/$(inputs.params.APP_NAME) --from secret/postgresql --overwrite -n 
 ---
 ## Create a cloud-native CI/CD pipeline on OpenShift
 
-`OpenShift Pipelines` is a cloud-native, continuous integration and continuous delivery (CI/CD) solution based on Kubernetes resources. It uses Tekton building blocks to automate deployments across multiple platforms by abstracting away the underlying implementation details. Tekton introduces a number of standard Custom Resource Definitions (CRDs) for defining CI/CD pipelines that are portable across Kubernetes distributions.
+OpenShift Pipelines is a cloud-native, continuous integration and continuous delivery (CI/CD) solution based on Kubernetes resources. It uses Tekton building blocks to automate deployments across multiple platforms by abstracting away the underlying implementation details. Tekton introduces a number of standard Custom Resource Definitions (CRDs) for defining CI/CD pipelines that are portable across Kubernetes distributions.
 
 More information can be found here:
 https://docs.openshift.com/container-platform/4.4/pipelines/understanding-openshift-pipelines.html
@@ -221,7 +221,7 @@ oc create -f pipeline.yaml           -n prod-env
 
 ## Build and promote the image on OpenShift TEST cluster
 
-1. Start the CI/CD Pipeline  from OpenShift Pipelines UI under `ci-env` project and wait until PipelinRun is complete :
+1. Start the CI/CD Pipeline  from OpenShift Pipelines UI under `ci-env` project and wait until pipelinRun is complete :
 
 ![IBM](images/strapi-pipeline.png?raw=true "IBM") 
 
@@ -229,7 +229,7 @@ oc create -f pipeline.yaml           -n prod-env
 ![IBM](images/start-stage-pipeline.png?raw=true "IBM") 
 
 
-2. Check the PipelineRun that the Strapi image was promoted (pushed) to `PRODUCTION` cluster:
+2. Check in the `pipelineRun` logs that that the Strapi image was promoted (pushed) to the production cluster:
 
 ![IBM](images/step-promote.png?raw=true "IBM") 
 
