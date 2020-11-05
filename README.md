@@ -267,7 +267,14 @@ strapi   image-registry.openshift-image-registry.svc:5000/prod-env/strapi   late
 
 ![IBM](images/start-prod-pipeline.png?raw=true "IBM") 
 
-3. Application is now deployed in `prod-env`.
+3. Application is now deployed in `prod-env`
+
+Retrive the access link for strapi application : 
+```
+oc config use-context <production-cluster-context>
+oc get route strapi -n prod-env 
+```
+
 
 ![IBM](images/strapi.png?raw=true "IBM") 
 ---
