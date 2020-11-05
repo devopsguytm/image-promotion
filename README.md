@@ -15,6 +15,12 @@ For this tutorial we will use [Strapi](https://strapi.io/) (open source Node.js 
 In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4.5 using Tekton Pipelines.
 
 
+### The image below illustrates what the OpenShift CI/CD Pipeline design looks like.
+
+![Pipeline Design](images/pipeline-design.png?raw=true "Pipeline Design")
+
+---
+
 ## Prerequisites
 
 Before you begin this tutorial, please complete the following steps:
@@ -149,10 +155,6 @@ oc config use-context <production-cluster-context>
 oc adm policy add-scc-to-user anyuid -z default -n prod-env
 oc adm policy add-scc-to-user privileged -z default -n prod-env
 ```
----
-### The image below illustrates what the OpenShift CI/CD Pipeline design looks like.
-
-![Pipeline Design](images/pipeline-design.png?raw=true "Pipeline Design")
 
 ---
 ## Provision PostgreSQL databases
