@@ -88,8 +88,7 @@ token-prod=`oc sa get-token pipeline`
 echo $token-prod
 oc whoami --show-server=true
 ```
-*note the pipeline service account token and PROD cluster login URL.
-*for example the PROD cluster login URL would be something like this : https://c100-e.eu-de.containers.cloud.ibm.com:32371
+*Note the pipeline service account token and PROD cluster login URL. For example the PROD cluster login URL would be something like this : https://c100-e.eu-de.containers.cloud.ibm.com:32371
 
 *You will need to edit [task-promote-prod.yaml] and update the prodRoute=<route to your OpenShift PRODUCTION cluster> placeholder.
 
