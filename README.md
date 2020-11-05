@@ -12,7 +12,7 @@ In this tutorial we will use two separate OpenShift v4.5 clusters, that represen
 
 For this tutorial we will use [Strapi](https://strapi.io/) (open source Node.js headless CMS), which we will build, deploy, test and promote in `staging` and `production` environments using Tekton pipeline. The test step from the pipeline is not implemented as it is not the scope of this tutorial. Strapi will be connected to an PostgreSQL database, which we will provision in OpenShift. 
 
-In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4 using Tekton Pipelines.
+In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4.5 using Tekton Pipelines.
 
 
 ## Prerequisites
@@ -20,7 +20,7 @@ In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image
 Before you begin this tutorial, please complete the following steps:
 
 1. Register for an [IBM Cloud account](https://cloud.ibm.com/registration).
-2. Create two [OpenShift 4 clusters on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_tutorial).
+2. Create two [OpenShift 4.5 clusters on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_tutorial).
 
 
 *Optional: Download [Visual Studio Code IDE](https://code.visualstudio.com) for editing the Node.js project.*
@@ -45,9 +45,9 @@ It’s also important to know what each Git folder contains:
 
 * `strapi-app` is the context root of the [Strapi](https://strapi.io/) (Open source Node.js Headless CMS) application.
 
-* `pipelines/stage` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for OCP TEST cluster.
+* `pipelines/stage` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for OpenShift test cluster.
 
-* `pipelines/prod` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for OCP PRODUCTION cluster.
+* `pipelines/prod` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for OpenShift production cluster.
 
 
 ---
@@ -89,7 +89,7 @@ token-prod=`oc sa get-token pipeline`
 echo $token-prod
 oc whoami --show-server=true
 ```
-*Note the pipeline service account token and OpenShift production cluster login URL
+*Note the pipeline service account token and OpenShift production cluster login URL.
 
 *You will need to edit [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml) and update the prodRoute=<route to your OpenShift production cluster> placeholder.
 
