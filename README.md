@@ -69,21 +69,24 @@ After successful installation, you will have all related Tekton building blocks 
 
 On OpenShift `test` cluster :
 ```
+oc config use-context <test-cluster-context>
 oc new-project ci-env
 oc new-project stage-env
 ```
 
 On OpenShift `production` cluster :
 ```
+oc config use-context <production-cluster-context>
 oc new-project prod-env
 ```
 
-3.  We will create the Strapi image in OpenShift TEST cluster and  promote the image in OpenShift PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the OpenShift PROD cluster. This token must be saved on OpenShift 
-cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for OpenShift TEST cluster, which will be used for promoting the image using skopeo copy tool.
+3.  We will create the Strapi image in OpenShift test cluster and  promote the image in OpenShift production cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the OpenShift production cluster. This token must be saved on OpenShift 
+cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for OpenShift test cluster, which will be used for promoting the image using skopeo copy tool.
 
 
 On OpenShift `production` cluster :
 ```
+oc config use-context <production-cluster-context>
 oc project prod-env
 token-prod=`oc sa get-token pipeline`
 echo $token-prod
@@ -96,6 +99,7 @@ oc whoami --show-server=true
 
 On OpenShift `test` cluster :
 ```
+oc config use-context <test-cluster-context>
 oc project ci-env
 oc create secret generic os-prod-cluster --from-literal=token=$token-prod
 token=`oc sa get-token pipeline`
@@ -123,6 +127,7 @@ Now you can use this secrets mounted inside a task pipeline as volume (see file 
 On OpenShift `test` cluster:
 
 ```
+oc config use-context <test-cluster-context>
 oc adm policy add-scc-to-user privileged system:serviceaccount:ci-env:pipeline -n ci-env
 oc adm policy add-scc-to-user privileged system:serviceaccount:ci-env:pipeline -n stage-env
 oc adm policy add-role-to-user edit system:serviceaccount:ci-env:pipeline -n ci-env
@@ -133,12 +138,14 @@ oc adm policy add-role-to-user edit system:serviceaccount:ci-env:pipeline -n sta
 
 On OpenShift `test` cluster :
 ```
+oc config use-context <test-cluster-context>
 oc adm policy add-scc-to-user anyuid -z default -n stage-env
 oc adm policy add-scc-to-user privileged -z default -n stage-env
 ```
 
 On OpenShift `production` cluster :
 ```
+oc config use-context <production-cluster-context>
 oc adm policy add-scc-to-user anyuid -z default -n prod-env
 oc adm policy add-scc-to-user privileged -z default -n prod-env
 ```
@@ -195,26 +202,20 @@ cd image-promotion
 
 On OpenShift `test` cluster :
 ```
-cd pipelines/stage
-oc create -f resources.yaml          -n ci-env
-oc create -f task-build.yaml         -n ci-env
-oc create -f task-deploy.yaml        -n ci-env
-oc create -f task-test.yaml          -n ci-env
-oc create -f task-promote-prod.yaml  -n ci-env
-oc create -f pipeline.yaml           -n ci-env
+oc config use-context <test-cluster-context>
+oc create -f pipelines/stage -n ci-env
 ```
 On OpenShift `production` cluster :
 ```
-cd pipelines/prod
-oc create -f task-deploy.yaml        -n prod-env
-oc create -f pipeline.yaml           -n prod-env
+oc config use-context <production-cluster-context>
+oc create -f pipelines/prod -n ci-env
 ```
 
 3. Update promote task with your OpenShift routes [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml): 
 
 ```
-           testRoute=<route to your OpenShift TEST cluster>
-           prodRoute=<route to your OpenShift PRODUCTION cluster>
+           testRoute=<route to your OpenShift test cluster>
+           prodRoute=<route to your OpenShift production cluster>
 ```
 
 ---
@@ -239,6 +240,7 @@ oc create -f pipeline.yaml           -n prod-env
 
 On OpenShift `TEST` cluster :
 ```
+oc config use-context <test-cluster-context>
 oc get is strapi -n stage-env 
 NAME     IMAGE REPOSITORY                                                       TAGS                              UPDATED
 strapi   image-registry.openshift-image-registry.svc:5000/stage-env/strapi   latest,1.0.0   2 minutes ago
@@ -253,6 +255,7 @@ strapi   image-registry.openshift-image-registry.svc:5000/stage-env/strapi   lat
 
 On OpenShift `PRODUCTION` cluster :
 ```
+oc config use-context <production-cluster-context>
 oc get is strapi -n prod-env 
 NAME     IMAGE REPOSITORY                                                       TAGS                              UPDATED
 strapi   image-registry.openshift-image-registry.svc:5000/prod-env/strapi   latest,1.0.0   1 minute ago
