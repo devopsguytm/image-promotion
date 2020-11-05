@@ -89,6 +89,10 @@ echo $token-prod
 oc whoami --show-server=true
 ```
 *note the pipeline service account token and PROD cluster login URL.
+*for example the PROD cluster login URL would be something like this : https://c100-e.eu-de.containers.cloud.ibm.com:32371
+
+*You will need to edit [task-promote-prod.yaml] and update the prodRoute=<route to your OpenShift PRODUCTION cluster> placeholder.
+
 
 On `TEST` cluster :
 ```
@@ -97,7 +101,9 @@ oc create secret generic os-prod-cluster --from-literal=token=$token-prod
 token=`oc sa get-token pipeline`
 echo $token
 oc create secret generic os-test-cluster --from-literal=token=$token
+oc whoami --show-server=true
 ```
+*note the pipeline service account token and TEST cluster login URL.
 
 Now you can use this secrets mounted inside a task pipeline as volume (see file [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml))
 ```
