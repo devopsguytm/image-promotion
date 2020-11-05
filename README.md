@@ -1,10 +1,10 @@
-# Promoting Docker Images from different OpenShift 4 clusters using Tekton CI/CD Pipeline
+# Promoting Docker Images from different OpenShift v4.x clusters using Tekton CI/CD Pipeline
 
 ![IBM](./images/os-logo.jpg?raw=true "IBM")
 
 [Red Hat OpenShift on IBM Cloud]( https://www.ibm.com/cloud/openshift) is an extension of the IBM Cloud Kubernetes Service, where IBM manages an OpenShift Container Platform for you. 
 
-Usually, projects are using separate OpenShift 4 clusters for TEST and PRODUCTION. In order to reduce the resource consumption on the PRODUCTION cluster, Docker images are built on the TEST cluster using `buildah` and promoted to PRODUCTION cluster using `skopeo` through a Tekton pipeline.
+Usually, projects are using separate OpenShift v4.x clusters for TEST and PRODUCTION. In order to reduce the resource consumption on the PRODUCTION cluster, Docker images are built on the TEST cluster using `buildah` and promoted to PRODUCTION cluster using `skopeo` through a Tekton pipeline.
 
 [Skopeo](https://www.redhat.com/en/blog/skopeo-10-released) is a tool for moving container images between different types of container storages.  It allows you to copy container images between container registries like docker.io, quay.io, and your internal container registry or different types of storage on your local system.
 
@@ -28,7 +28,7 @@ Before you begin this tutorial, please complete the following steps:
 
 ## Estimated time 
 
-It should take you approximately 1-2 hour to provision the OpenShift clusters and to perform this tutorial.  
+It should take you approximately 1 hour to provision the OpenShift clusters and to perform this tutorial.  
 
 ---
 
@@ -163,7 +163,7 @@ database-user:       7 bytes
 ```
 Check [task-deploy.yaml](pipelines/stage/task-deploy.yaml) :
 ```
-oc set env dc/$(inputs.params.APP_NAME) --from secret/postgresql --overwrite -n $(inputs.params.DEPLOY_PROJ)
+oc set env dc/$(inputs.params.APP_NAME) --from secret/postgresql --overwrite -n $(inputs.params.DEPLOY_PROJECT)
 ```
 
 ---
