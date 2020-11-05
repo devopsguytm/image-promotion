@@ -4,15 +4,15 @@
 
 [Red Hat OpenShift on IBM Cloud]( https://www.ibm.com/cloud/openshift) is an extension of the IBM Cloud Kubernetes Service, where IBM manages an OpenShift Container Platform for you. 
 
-Usually, projects are using separate OpenShift v4.x clusters for TEST and PRODUCTION. In order to increase security and resilience  as well as to reduce the resource consumption on the PRODUCTION cluster, Docker images are built and tested on the TEST cluster using `buildah` and promoted to PRODUCTION cluster using `skopeo` through a Tekton pipeline.
+In this tutorial we will use two separate OpenShift v4.x clusters, that represent the test and production environments. In order to increase security and resilience  as well as to reduce the resource consumption on the OpenShift PRODUCTION cluster, Docker images are built and tested on the OpenShift TEST cluster using `buildah` and promoted to OpenShift PRODUCTION cluster using `skopeo` through a Tekton pipeline.
 
 [Skopeo](https://www.redhat.com/en/blog/skopeo-10-released) is a tool for moving container images between different types of container storages.  It allows you to copy container images between container registries like docker.io, quay.io, and your internal container registry or different types of storage on your local system.
 
 [Tekton Pipelines]( https://developer.ibm.com/videos/what-is-tekton/) is an open source framework used for creating cloud-native continuous integration and continuous delivery (CI/CD) pipelines that run on Kubernetes. Tekton Pipelines was built specifically for container environments, supports the software lifecycle, and uses a serverless approach.
 
-For this tutorial we will use [Strapi](https://strapi.io/) (Open source Node.js Headless CMS), which we will build, deploy and promote in `staging` and `production` environments. Strapi will be connected to an PostgreSQL database, which we will provision in OpenShift. 
+For this tutorial we will use [Strapi](https://strapi.io/) (open source Node.js headless CMS), which we will build, deploy and promote in `staging` and `production` environments. Strapi will be connected to an PostgreSQL database, which we will provision in OpenShift. 
 
-In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4.3 using Tekton Pipelines.
+In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image promotion on Red Hat OpenShift 4 using Tekton Pipelines.
 
 
 ## Prerequisites
@@ -20,7 +20,7 @@ In this tutorial, you will become familiar with Tekton CI/CD pipelines and Image
 Before you begin this tutorial, please complete the following steps:
 
 1. Register for an [IBM Cloud account](https://cloud.ibm.com/registration).
-2. Create two [OpenShift 4.3 clusters on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_tutorial).
+2. Create two [OpenShift 4 clusters on IBM Cloud](https://cloud.ibm.com/docs/openshift?topic=openshift-openshift_tutorial).
 
 
 *Optional: Download [Visual Studio Code IDE](https://code.visualstudio.com) for editing the Node.js project.*
@@ -37,17 +37,17 @@ It should take you approximately 1 hour to provision the OpenShift clusters and 
 1. [Configure OpenShift clusters](#configure-openshift-clusters)
 2. [Provision PostgreSQL databases](#provision-postgresql-databases)
 3. [Create a cloud-native CI/CD pipeline on OpenShift](#create-a-cloud-native-cicd-pipeline-on-openshift)
-4. [Build and promote the image on TEST cluster](#build-and-promote-the-image-on-test-cluster)
-5. [Deploy newly created image on PROD cluster](#deploy-newly-created-image-on-prod-cluster)
+4. [Build and promote the image on OCP TEST cluster](#build-and-promote-the-image-on-ocp-test-cluster)
+5. [Deploy newly created image on OCP PROD cluster](#deploy-newly-created-image-on-ocp-prod-cluster)
 
 
 It’s also important to know what each Git folder contains: 
 
 * `strapi-app` is the context root of the [Strapi](https://strapi.io/) (Open source Node.js Headless CMS) application.
 
-* `pipelines/stage` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for TEST cluster.
+* `pipelines/stage` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for OCP TEST cluster.
 
-* `pipelines/prod` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for PRODUCTION cluster.
+* `pipelines/prod` contains the [OpenShift Pipeline](https://www.openshift.com/learn/topics/pipelines) implementation and YAML resources for OCP PRODUCTION cluster.
 
 
 ---
@@ -67,33 +67,34 @@ After successful installation, you will have all related Tekton building blocks 
 
 2. Create `ci-env`, `stage-env` and `prod-env` projects. In `ci-env`, you will store the CI/CD pipeline and all pipeline resources. In `stage-env` and `prod-env`, you will deploy the application through image promotion.
 
-On `TEST` cluster :
+On OpenShift `TEST` cluster :
 ```
 oc new-project ci-env
 oc new-project stage-env
 ```
 
-On `PRODUCTION` cluster :
+On OpenShift `PRODUCTION` cluster :
 ```
 oc new-project prod-env
 ```
 
-3.  We will create the Strapi image in OCP TEST cluster and  promote the image in OCP PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on TEST cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
+3.  We will create the Strapi image in OpenShift TEST cluster and  promote the image in OpenShift PROD cluster, therefore we need to link these 2 clusters. This is done by generating a serviceaccount login token from the PROD cluster. This token must be saved on OpenShift 
+cluster as a secret (eg. os-prod-cluster). Another token muste be generatd for OpenShift TEST cluster, which will be used for promoting the image using `skopeo` copy tool.
 
 
-On `PRODUCTION` cluster :
+On OpenShift `PRODUCTION` cluster :
 ```
 oc project prod-env
 token-prod=`oc sa get-token pipeline`
 echo $token-prod
 oc whoami --show-server=true
 ```
-*Note the pipeline service account token and PROD cluster login URL. For example the PROD cluster login URL would be something like this : https://c100-e.eu-de.containers.cloud.ibm.com:32371
+*Note the pipeline service account token and OpenShift PROD cluster login URL. For example the OpenShift PROD cluster login URL would be something like this : https://<host>.cloud.ibm.com:<port>
 
 *You will need to edit [task-promote-prod.yaml] and update the prodRoute=<route to your OpenShift PRODUCTION cluster> placeholder.
 
 
-On `TEST` cluster :
+On OpenShift `TEST` cluster :
 ```
 oc project ci-env
 oc create secret generic os-prod-cluster --from-literal=token=$token-prod
@@ -102,7 +103,7 @@ echo $token
 oc create secret generic os-test-cluster --from-literal=token=$token
 oc whoami --show-server=true
 ```
-*note the pipeline service account token and TEST cluster login URL.
+*note the pipeline service account token and OpenShift TEST cluster login URL.
 
 Now you can use this secrets mounted inside a task pipeline as volume (see file [task-promote-prod.yaml](pipelines/stage/task-promote-prod.yaml))
 ```
@@ -119,7 +120,7 @@ Now you can use this secrets mounted inside a task pipeline as volume (see file 
 
 4. Allow the `pipeline` ServiceAccount to create resources and make deploys on `stage-env` project:
 
-On `TEST` cluster:
+On OpenShift `TEST` cluster:
 
 ```
 oc adm policy add-scc-to-user privileged system:serviceaccount:ci-env:pipeline -n ci-env
@@ -130,13 +131,13 @@ oc adm policy add-role-to-user edit system:serviceaccount:ci-env:pipeline -n sta
 
 5. Allow default ServiceAccount to run image as ROOT, because Strapi app runs as ROOT.
 
-On `TEST` cluster :
+On OpenShift `TEST` cluster :
 ```
 oc adm policy add-scc-to-user anyuid -z default -n stage-env
 oc adm policy add-scc-to-user privileged -z default -n stage-env
 ```
 
-On `PRODUCTION` cluster :
+On OpenShift `PRODUCTION` cluster :
 ```
 oc adm policy add-scc-to-user anyuid -z default -n prod-env
 oc adm policy add-scc-to-user privileged -z default -n prod-env
@@ -192,7 +193,7 @@ cd image-promotion
 
 2. Create Tekton resources, tasks, and a pipeline:
 
-On `TEST` cluster :
+On OpenShift `TEST` cluster :
 ```
 cd pipelines/stage
 oc create -f resources.yaml          -n ci-env
@@ -202,7 +203,7 @@ oc create -f task-test.yaml          -n ci-env
 oc create -f task-promote-prod.yaml  -n ci-env
 oc create -f pipeline.yaml           -n ci-env
 ```
-On `PRODUCTION` cluster :
+On OpenShift `PRODUCTION` cluster :
 ```
 cd pipelines/prod
 oc create -f task-deploy.yaml        -n prod-env
@@ -236,7 +237,7 @@ oc create -f pipeline.yaml           -n prod-env
 
 3. Check the newly Strapi image created in `stage-env` project:
 
-On `TEST` cluster :
+On OpenShift `TEST` cluster :
 ```
 oc get is strapi -n stage-env 
 NAME     IMAGE REPOSITORY                                                       TAGS                              UPDATED
@@ -250,7 +251,7 @@ strapi   image-registry.openshift-image-registry.svc:5000/stage-env/strapi   lat
 
 1. Check the newly Strapi image pushed from TEST cluster in `prod-env` project:
 
-On `PRODUCTION` cluster :
+On OpenShift `PRODUCTION` cluster :
 ```
 oc get is strapi -n prod-env 
 NAME     IMAGE REPOSITORY                                                       TAGS                              UPDATED
