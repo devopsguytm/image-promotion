@@ -4,7 +4,7 @@
 
 [Red Hat OpenShift on IBM Cloud]( https://www.ibm.com/cloud/openshift) is an extension of the IBM Cloud Kubernetes Service, where IBM manages an OpenShift Container Platform for you. 
 
-Usually, projects are using separate OpenShift v4.x clusters for TEST and PRODUCTION. In order to reduce the resource consumption on the PRODUCTION cluster, Docker images are built on the TEST cluster using `buildah` and promoted to PRODUCTION cluster using `skopeo` through a Tekton pipeline.
+Usually, projects are using separate OpenShift v4.x clusters for TEST and PRODUCTION. In order to increase security and resilience  as well as to reduce the resource consumption on the PRODUCTION cluster, Docker images are built and tested on the TEST cluster using `buildah` and promoted to PRODUCTION cluster using `skopeo` through a Tekton pipeline.
 
 [Skopeo](https://www.redhat.com/en/blog/skopeo-10-released) is a tool for moving container images between different types of container storages.  It allows you to copy container images between container registries like docker.io, quay.io, and your internal container registry or different types of storage on your local system.
 
