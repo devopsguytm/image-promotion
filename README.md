@@ -37,8 +37,8 @@ It should take you approximately 1 hour to provision the OpenShift clusters and 
 1. [Configure OpenShift clusters](#configure-openshift-clusters)
 2. [Provision PostgreSQL databases](#provision-postgresql-databases)
 3. [Create a cloud-native CI/CD pipeline on OpenShift](#create-a-cloud-native-cicd-pipeline-on-openshift)
-4. [Build and promote the image on OpenShift TEST cluster](#build-and-promote-the-image-on-openshift-test-cluster)
-5. [Deploy newly created image on OpenShift PROD cluster](#deploy-newly-created-image-on-openshift-prod-cluster)
+4. [Build and promote the image on OpenShift test cluster](#build-and-promote-the-image-on-openshift-test-cluster)
+5. [Deploy newly created image on OpenShift production cluster](#deploy-newly-created-image-on-openshift-production-cluster)
 
 
 It’s also important to know what each Git folder contains: 
@@ -220,7 +220,7 @@ oc create -f pipelines/prod -n ci-env
 
 ---
 
-## Build and promote the image on OpenShift TEST cluster
+## Build and promote the image on OpenShift test cluster
 
 1. Start the CI/CD Pipeline  from OpenShift Pipelines UI under `ci-env` project and wait until pipelinRun is complete :
 
@@ -249,11 +249,11 @@ strapi   image-registry.openshift-image-registry.svc:5000/stage-env/strapi   lat
 4. Application is now deployed in `stage-env`.
 ---
 
-## Deploy newly created image on OpenShift PROD cluster
+## Deploy newly created image on OpenShift production cluster
 
 1. Check the newly Strapi image pushed from test cluster in `prod-env` project:
 
-On OpenShift `PRODUCTION` cluster :
+On OpenShift `production` cluster :
 ```
 oc config use-context <production-cluster-context>
 oc get is strapi -n prod-env 
